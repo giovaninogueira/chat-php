@@ -1,5 +1,4 @@
 ## Bem vindo ao Chat em php
--
 
 Para inicializar o proejto, basta seguir as instruções abaixo:
 
@@ -7,13 +6,13 @@ Para inicializar o proejto, basta seguir as instruções abaixo:
 
 2-) Após instalar as dependências, executar o comando "php index.php"
 
-3-) Após o server estiver sendo executado, basta apenas chamar ele no cliente (web)
+- Após o server estiver sendo executado, basta chamar ele no cliente (web), segue instruções abaixo
 
 
-## Inicializando o chat no cliente (online User)
-
+## Inicializando o chat (User Online)
+```
 var conn = new WebSocket('ws://localhost:8090');
-
+```
 - Inicializando a conexão com o chat
 ```
 conn.onopen = function(e) {
@@ -36,6 +35,9 @@ conn.onclose = function(e) {
    console.log("User close connection!");
 };
 ```
+
+**Autor**: Giovani Cassiano Nogueira <giovani.cassiano@outlook.com>
+
 ## Créditos
 
 [RATCHET](http://socketo.me)
