@@ -1,0 +1,15 @@
+{
+    "name": "giovani/chat",
+    "description": "Chat in PHP, using Ratchet",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Giovani",
+            "email": "giovani.cassiano@outlook.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "cboden/ratchet": "^0.4.1"
+    }
+}
