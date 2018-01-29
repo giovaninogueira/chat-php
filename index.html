@@ -1,0 +1,93 @@
+<html>
+<head>
+    <style>
+        body{width:600px;font-family:calibri;}
+        .error {color:#FF0000;}
+        .chat-connection-ack{color: #26af26;}
+        .chat-message {border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;
+        }
+        #btnSend {background: #26af26;border: #26af26 1px solid;	border-radius: 4px;color: #FFF;display: block;margin: 15px 0px;padding: 10px 50px;cursor: pointer;
+        }
+        #chat-box {background: #fff8f8;border: 1px solid #ffdddd;border-radius: 4px;border-bottom-left-radius:0px;border-bottom-right-radius: 0px;min-height: 300px;padding: 10px;overflow: auto;
+        }
+        .chat-box-html{color: #09F;margin: 10px 0px;font-size:0.8em;}
+        .chat-box-message{color: #09F;padding: 5px 10px; background-color: #fff;border: 1px solid #ffdddd;border-radius:4px;display:inline-block;}
+        .chat-input{border: 1px solid #ffdddd;border-top: 0px;width: 100%;box-sizing: border-box;padding: 10px 8px;color: #191919;
+        }
+    </style>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script>
+
+        function showMessage(messageHTML) {
+            $('#chat-box').append(messageHTML);
+        }
+
+        $(document).ready(function(){
+
+            var websocket = new WebSocket("ws://localhost:8090/chat/");
+
+            websocket.onopen = function(event) {
+                console.log(event);
+                showMessage("<div class='chat-connection-ack'>Connection is established!</div>");
+            }
+
+            websocket.onmessage = function(event) {
+                var Data = JSON.parse(event.data);
+                console.log(Data);
+                if(Data.length >= 1){
+                    var id = Math.floor(Math.random() * 3) + 1;
+                    alert(id);
+                    for (i=0; i < Data.length; i++){
+                        if(Data[i].id_user == id){
+                            showMessage("<div class='chat-box-html' style='text-align: right'>" +
+                                ""+Data[i].date+" "+Data[i].message+"</div>");
+                            $('#chat-message').val('');
+                        }else{
+                            showMessage("<div class='chat-box-html'></br>" +
+                                ""+Data[i].date+" "+Data[i].message+"</div>");
+                            $('#chat-message').val('');
+                        }
+                    }
+                }else{
+                    showMessage("<div class='chat-box-html'></br>" +
+                        ""+Data.date+" "+Data.message+"</div>");
+                    $('#chat-message').val('');
+                }
+            };
+
+            websocket.onerror = function(event){
+                showMessage("<div class='error'>Problem due to some Error</div>");
+            };
+
+            websocket.onclose = function(event){
+                showMessage("<div class='chat-connection-ack'>Connection Closed</div>");
+            };
+
+            $('#frmChat').on("submit",function(event){
+                event.preventDefault();
+                $('#chat-user').attr("type","hidden");
+                var messageJSON = {
+                    user: $('#chat-user').val(),
+                    msg: $('#chat-message').val(),
+                    forAll: $('#for_all').val(),
+                    to: $('#to_user').val()
+                };
+                websocket.send(JSON.stringify(messageJSON));
+                showMessage("<div class='chat-box-html' style='text-align: right'>"+$('#chat-message').val()+"</div>")
+            });
+        });
+
+    </script>
+</head>
+<body>
+<form name="frmChat" id="frmChat">
+    <div id="chat-box">
+    </div>
+    <input type="text" name="to-user" id="to_user" placeholder="For user" class="chat-input" />
+    <input type="text" name="for-all" id="for_all" placeholder="For All user ? True or false" class="chat-input" required />
+    <input type="text" name="chat-user" id="chat-user" placeholder="Id User" class="chat-input" required />
+    <input type="text" name="chat-message" id="chat-message" placeholder="Message"  class="chat-input chat-message" required />
+    <input type="submit" id="btnSend" name="send-chat-message" value="Send" >
+</form>
+</body>
+</html>

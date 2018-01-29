@@ -12,7 +12,14 @@ class Connection extends \PDO
         $rule = parse_ini_file($file_connection);
         try
         {
-            parent::__construct($rule['DRIVER'].':'.'host='.$rule['HOST'] . ';' . $rule['DATABASE'], $rule['USER'], $rule['PASSWORD']);
+            parent::__construct(
+                'mysql:host='.$rule['HOST'].';'.
+                'dbname='.$rule['DATABASE'],
+                $rule['USER'],
+                $rule['PASSWORD'],
+                array(\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8")
+            );
+
         }
         catch (\Exception $e)
         {

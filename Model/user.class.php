@@ -2,10 +2,43 @@
 
 namespace Model;
 
-class Cliente
+class User
 {
-    public $id;
-    public $name;
-    public $ip;
-    public $apelido;
+    private $connection;
+
+    public function __construct($conn)
+    {
+        $this->connection = $conn;
+    }
+
+    public function getUserById($id)
+    {
+        $sql = "SELECT * FROM user where id =:id";
+        $prepare = $this->connection->prepare($sql);
+        $prepare->execute([':id'=>$id]);
+        $result = $prepare->fetchAll(\PDO::FETCH_ASSOC);
+        return $result[0];
+    }
+
+    public function saveTimeline($msg, $id_user)
+    {
+        $sql = "INSERT INTO timeline (id_user, message, date) values (:id_user, :message, :date)";
+        $prepare = $this->connection->prepare($sql);
+        $prepare->execute(
+            [
+                'id_user'=>$id_user,
+                'message'=>$msg,
+                'date'=> date('Y-m-d H:i:s')
+            ]
+        );
+    }
+
+    public function getMessagesTimeline()
+    {
+        $sql = "select * from timeline order by date asc";
+        $prepare = $this->connection->prepare($sql);
+        $prepare->execute();
+        $result = $prepare->fetchAll(\PDO::FETCH_ASSOC);
+        return $result;
+    }
 }
