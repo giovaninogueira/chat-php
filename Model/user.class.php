@@ -35,7 +35,7 @@ class User
 
     public function getMessagesTimeline()
     {
-        $sql = "select * from timeline order by date asc";
+        $sql = "select user.nome, timeline.message, timeline.id_user, timeline.date from timeline inner join user on user.id = timeline.id_user order by date asc";
         $prepare = $this->connection->prepare($sql);
         $prepare->execute();
         $result = $prepare->fetchAll(\PDO::FETCH_ASSOC);

@@ -24,56 +24,84 @@
 
         $(document).ready(function(){
 
+            var id = Math.floor(Math.random() * 3) + 1;
             var websocket = new WebSocket("ws://localhost:8090/chat/");
 
+            function toSendUserOnline() {
+                alert(id);
+                var messageJSON = {
+                    id_user: id,
+                    type: 'online',
+                    idCon:0
+                };
+                websocket.send(JSON.stringify(messageJSON));
+            }
+
+            function toSendMessage(){
+                $('#chat-user').attr("type","hidden");
+                var messageJSON = {
+                    id_user: id,
+                    message: $('#chat-message').val(),
+                    type: 'message',
+                };
+                websocket.send(JSON.stringify(messageJSON));
+            }
+
             websocket.onopen = function(event) {
-                console.log(event);
                 showMessage("<div class='chat-connection-ack'>Connection is established!</div>");
+                toSendUserOnline();
             }
 
             websocket.onmessage = function(event) {
                 var Data = JSON.parse(event.data);
-                console.log(Data);
-                if(Data.length >= 1){
-                    var id = Math.floor(Math.random() * 3) + 1;
-                    alert(id);
-                    for (i=0; i < Data.length; i++){
-                        if(Data[i].id_user == id){
-                            showMessage("<div class='chat-box-html' style='text-align: right'>" +
-                                ""+Data[i].date+" "+Data[i].message+"</div>");
-                            $('#chat-message').val('');
-                        }else{
-                            showMessage("<div class='chat-box-html'></br>" +
-                                ""+Data[i].date+" "+Data[i].message+"</div>");
-                            $('#chat-message').val('');
-                        }
-                    }
-                }else{
-                    showMessage("<div class='chat-box-html'></br>" +
-                        ""+Data.date+" "+Data.message+"</div>");
-                    $('#chat-message').val('');
+
+                if(Data.type === 'disconnected'){
+                    console.log(Data);
+                    disconnected(Data.name_user);
+                }
+
+                else if(Data.usersOnline)
+                    console.log(Data);
+
+                else if(Data.msg){
+                    console.log(Data);
+                    $.each(Data.msg, function(index, value){
+                        showMessages(value);
+                    });
+                }
+
+                else if(Data.message){
+                    showMessages(Data.message);
                 }
             };
 
+            function disconnected(msg){
+                showMessage("</br><div style='color: #FF0000' class='chat-box-html'>User "+msg+" has disconnected</div>");
+            }
+
+            function showMessages(value){
+                if(value.id_user == id){
+                    showMessage("<div class='chat-box-html' style='text-align: right'>" +
+                        "("+value.date+") "+value.nome+" </br> "+value.message+"</div>");
+                }else{
+                    showMessage("<div class='chat-box-html'></br>" +
+                        "("+value.date+") "+value.nome+" </br> "+value.message+"</div>");
+                }
+            }
+
             websocket.onerror = function(event){
+                console.log(event);
                 showMessage("<div class='error'>Problem due to some Error</div>");
             };
 
             websocket.onclose = function(event){
+                console.log(event);
                 showMessage("<div class='chat-connection-ack'>Connection Closed</div>");
             };
 
             $('#frmChat').on("submit",function(event){
                 event.preventDefault();
-                $('#chat-user').attr("type","hidden");
-                var messageJSON = {
-                    user: $('#chat-user').val(),
-                    msg: $('#chat-message').val(),
-                    forAll: $('#for_all').val(),
-                    to: $('#to_user').val()
-                };
-                websocket.send(JSON.stringify(messageJSON));
-                showMessage("<div class='chat-box-html' style='text-align: right'>"+$('#chat-message').val()+"</div>")
+                toSendMessage();
             });
         });
 
@@ -83,9 +111,9 @@
 <form name="frmChat" id="frmChat">
     <div id="chat-box">
     </div>
-    <input type="text" name="to-user" id="to_user" placeholder="For user" class="chat-input" />
+    <!--<input type="text" name="to-user" id="to_user" placeholder="For user" class="chat-input" />
     <input type="text" name="for-all" id="for_all" placeholder="For All user ? True or false" class="chat-input" required />
-    <input type="text" name="chat-user" id="chat-user" placeholder="Id User" class="chat-input" required />
+    <input type="text" name="chat-user" id="chat-user" placeholder="Id User" class="chat-input" required />-->
     <input type="text" name="chat-message" id="chat-message" placeholder="Message"  class="chat-input chat-message" required />
     <input type="submit" id="btnSend" name="send-chat-message" value="Send" >
 </form>
